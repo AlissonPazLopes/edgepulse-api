@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: edgepulse-api
+  datasource:
+    url: jdbc:postgresql://localhost:5432/edgepulse_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  cache:
+    type: redis
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+      indent-output: true
+    default-property-inclusion: non_null
+
+server:
+  port: 8080

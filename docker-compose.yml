@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: edgepulse-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: edgepulse_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - edgepulse_pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: edgepulse-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+volumes:
+  edgepulse_pgdata:
