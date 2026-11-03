@@ -6,10 +6,10 @@ spring:
     password:
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     show-sql: true
   flyway:
-    enabled: false
+    enabled: true
   cache:
     type: simple
   autoconfigure:
