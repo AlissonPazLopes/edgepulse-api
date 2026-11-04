@@ -90,4 +90,12 @@ public class Dispositivo {
 		}
 	}
 
+	public boolean isPerifericoDisplayAtivo() {
+		return Boolean.TRUE.equals(this.perifericoDisplayAtivo);
+	}
+
+	public boolean isPerifericoAudioAtivo() {
+		return Boolean.TRUE.equals(this.perifericoAudioAtivo);
+	}
+
 }
