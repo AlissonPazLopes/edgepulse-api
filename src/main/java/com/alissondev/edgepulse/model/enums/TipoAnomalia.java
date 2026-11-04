@@ -1,0 +1,11 @@
+package com.alissondev.edgepulse.model.enums;
+
+public enum TipoAnomalia {
+	SUPERAQUECIMENTO,
+	SUBTENSAO_ELETRICA,
+	BATERIA_CRITICA,
+	FALHA_PERIFERICO_DISPLAY,
+	FALHA_PERIFERICO_AUDIO,
+	HEARTBEAT_TIMEOUT,
+	FALHA_OTA
+}
