@@ -64,7 +64,7 @@ public class Dispositivo {
 	@Column(name = "ultimo_heartbeat")
 	private LocalDateTime ultimoHeartbeat;
 
-	@Column(name = "data_cadastro", nullable = false, updatable = false)
+	@Column(name = "data_cadastro", nullable = false)
 	private LocalDateTime dataCadastro;
 
 	@Version
