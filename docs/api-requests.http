@@ -1,0 +1,138 @@
+### ============================================================================
+### EdgePulse API - Exemplos de Requisições HTTP (REST Client / IntelliJ / VS Code)
+### Base URL: http://localhost:8080
+### Swagger UI: http://localhost:8080/swagger-ui.html
+### ============================================================================
+
+@baseUrl = http://localhost:8080
+
+### 1. Health Check da Plataforma
+GET {{baseUrl}}/api/health
+Accept: application/json
+
+### 2. Criar Cluster de Produção (ESP32 Industrial)
+POST {{baseUrl}}/api/clusters
+Content-Type: application/json
+
+{
+  "nome": "Cluster-Planta-Sul-01",
+  "ambiente": "PRODUCAO",
+  "localizacao": "Curitiba - Galpão de Automação B",
+  "intervaloHeartbeatSegundos": 30,
+  "ativo": true
+}
+
+### 3. Listar Clusters Cadastrados
+GET {{baseUrl}}/api/clusters
+Accept: application/json
+
+### 4. Cadastrar Dispositivo Embarcado ESP32-S3 (Display OLED + Áudio I2S)
+POST {{baseUrl}}/api/dispositivos
+Content-Type: application/json
+
+{
+  "clusterId": 1,
+  "nome": "ESP32-S3-Painel-Acustico-01",
+  "macAddress": "AA:BB:CC:11:22:33",
+  "modeloHardware": "ESP32-S3",
+  "versaoFirmwareAtual": "v1.0.0",
+  "perifericoDisplayAtivo": true,
+  "perifericoAudioAtivo": true
+}
+
+### 5. Buscar Dispositivo por MAC Address
+GET {{baseUrl}}/api/dispositivos/mac/AA:BB:CC:11:22:33
+Accept: application/json
+
+### 6. Ingerir Pacote de Telemetria Normal (Transiciona para ONLINE)
+POST {{baseUrl}}/api/telemetria
+Content-Type: application/json
+
+{
+  "macAddress": "AA:BB:CC:11:22:33",
+  "temperaturaCpuC": 48.50,
+  "tensaoAlimentacaoV": 3.30,
+  "nivelBateriaPct": 92,
+  "sinalWifiRssiDbm": -54,
+  "memoriaHeapLivreBytes": 212992,
+  "statusDisplayOk": true,
+  "statusAudioOk": true
+}
+
+### 7. Ingerir Telemetria com Anomalia Térmica e Falha no Display (Transiciona para DEGRADADO + Abre Incidente)
+POST {{baseUrl}}/api/telemetria
+Content-Type: application/json
+
+{
+  "macAddress": "AA:BB:CC:11:22:33",
+  "temperaturaCpuC": 86.40,
+  "tensaoAlimentacaoV": 3.25,
+  "nivelBateriaPct": 85,
+  "sinalWifiRssiDbm": -62,
+  "memoriaHeapLivreBytes": 184320,
+  "statusDisplayOk": false,
+  "statusAudioOk": true
+}
+
+### 8. Consultar Resumo Estatístico de Telemetria do Dispositivo
+GET {{baseUrl}}/api/telemetria/dispositivo/1/resumo
+Accept: application/json
+
+### 9. Listar Incidentes Abertos do Dispositivo
+GET {{baseUrl}}/api/incidentes/dispositivo/1
+Accept: application/json
+
+### 10. Resolver Incidente Operacional (Contabiliza MTTR)
+PATCH {{baseUrl}}/api/incidentes/1/resolver
+Content-Type: application/json
+
+{
+  "notaResolucao": "Dissipador térmico limpo e barramento I2C do display OLED reinicializado"
+}
+
+### 11. Consultar Métricas de Confiabilidade (MTBF, MTTR e Disponibilidade)
+GET {{baseUrl}}/api/incidentes/dispositivo/1/confiabilidade
+Accept: application/json
+
+### 12. Executar Varredura Manual do Watchdog de Heartbeat
+POST {{baseUrl}}/api/incidentes/watchdog/verificar
+Accept: application/json
+
+### 13. Publicar Nova Release de Firmware OTA com Checksum SHA-256
+POST {{baseUrl}}/api/ota/releases
+Content-Type: application/json
+
+{
+  "versao": "v2.0.0",
+  "modeloHardwareAlvo": "ESP32-S3",
+  "checksumSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "tamanhoBytes": 655360,
+  "notasLancamento": "Otimização do buffer DMA para áudio I2S e correção de watchdog timer",
+  "estavel": true
+}
+
+### 14. Iniciar Rollout OTA para o Dispositivo
+POST {{baseUrl}}/api/ota/implantacoes
+Content-Type: application/json
+
+{
+  "dispositivoId": 1,
+  "firmwareDestinoId": 1
+}
+
+### 15. Confirmar Sucesso da Atualização OTA com Validação de Checksum SHA-256
+PATCH {{baseUrl}}/api/ota/implantacoes/1/resultado
+Content-Type: application/json
+
+{
+  "sucesso": true,
+  "checksumCalculadoNoDispositivo": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
+
+### 16. Consultar Dashboard Analítico de Saúde do Cluster
+GET {{baseUrl}}/api/dashboard/clusters/1
+Accept: application/json
+
+### 17. Consultar Resumo Global da Plataforma EdgePulse
+GET {{baseUrl}}/api/dashboard/global
+Accept: application/json
