@@ -95,3 +95,72 @@ Durante cada ingestão em `POST /api/telemetria`, o `TelemetriaService` inspecio
 3. **Callback de Verificação e Rollback (`PATCH /api/ota/implantacoes/{id}/resultado`):**
    - **Sucesso + Checksum SHA-256 Idêntico:** Efetiva a nova versão de firmware no dispositivo, encerra a implantação como `SUCESSO` e restaura o status para `ONLINE`.
    - **Falha Física ou Hash SHA-256 Divergente:** Aciona o **Rollback Automático**, marca a implantação como `FALHA_ROLLBACK`, restaura imediatamente a `versaoAnterior` no registro do dispositivo, altera seu status para `DEGRADADO` e publica um `AnomaliaDetectadaEvent` (`FALHA_OTA`).
+
+---
+
+## 📡 Tabela Completa de Endpoints REST
+
+A documentação interativa do **Swagger UI** fica disponível em `http://localhost:8080/swagger-ui.html` e a especificação OpenAPI 3 JSON em `http://localhost:8080/v3/api-docs`.
+
+| Domínio | Método | Endpoint | Descrição |
+| :--- | :---: | :--- | :--- |
+| **Health** | `GET` | `/api/health` | Verifica status da API e motor de telemetria |
+| **Clusters** | `POST` | `/api/clusters` | Cria um novo cluster de dispositivos embarcados |
+| **Clusters** | `GET` | `/api/clusters` | Lista todos os clusters (com cache) |
+| **Clusters** | `GET` | `/api/clusters/{id}` | Busca um cluster pelo ID |
+| **Dispositivos** | `POST` | `/api/dispositivos` | Cadastra nó embarcado ESP32 (normaliza MAC Address) |
+| **Dispositivos** | `GET` | `/api/dispositivos` | Lista todos os dispositivos embarcados |
+| **Dispositivos** | `GET` | `/api/dispositivos/{id}` | Busca dispositivo por ID |
+| **Dispositivos** | `GET` | `/api/dispositivos/mac/{macAddress}` | Busca dispositivo pelo MAC Address |
+| **Dispositivos** | `GET` | `/api/dispositivos/cluster/{clusterId}` | Lista dispositivos de um cluster específico |
+| **Dispositivos** | `PATCH` | `/api/dispositivos/{id}/status` | Atualiza status operacional do dispositivo (`@Version`) |
+| **Telemetria** | `POST` | `/api/telemetria` | Ingere pacote de telemetria, atualiza heartbeat e avalia anomalias |
+| **Telemetria** | `GET` | `/api/telemetria/dispositivo/{dispositivoId}` | Histórico de leituras de telemetria do nó |
+| **Telemetria** | `GET` | `/api/telemetria/dispositivo/{dispositivoId}/ultima` | Retorna a última leitura enviada pelo dispositivo |
+| **Telemetria** | `GET` | `/api/telemetria/anomalias` | Lista todas as leituras com anomalia detectada |
+| **Telemetria** | `GET` | `/api/telemetria/dispositivo/{dispositivoId}/resumo` | Resumo estatístico (médias de temperatura e tensão) |
+| **Incidentes & MTBF** | `GET` | `/api/incidentes` | Lista todos os incidentes operacionais |
+| **Incidentes & MTBF** | `GET` | `/api/incidentes/dispositivo/{dispositivoId}` | Lista incidentes por dispositivo |
+| **Incidentes & MTBF** | `POST` | `/api/incidentes` | Abre um incidente operacional manualmente |
+| **Incidentes & MTBF** | `PATCH` | `/api/incidentes/{id}/resolver` | Resolve incidente, calcula tempo de reparo e restaura nó |
+| **Incidentes & MTBF** | `POST` | `/api/incidentes/watchdog/verificar` | Aciona varredura manual do Watchdog de Heartbeat |
+| **Incidentes & MTBF** | `GET` | `/api/incidentes/dispositivo/{dispositivoId}/confiabilidade` | Calcula `MTBF`, `MTTR`, `Uptime` e `Disponibilidade (%)` |
+| **Firmware OTA** | `POST` | `/api/ota/releases` | Publica nova release de firmware com hash SHA-256 |
+| **Firmware OTA** | `GET` | `/api/ota/releases` | Lista todas as releases de firmware |
+| **Firmware OTA** | `POST` | `/api/ota/implantacoes` | Inicia rollout OTA validando modelo de hardware |
+| **Firmware OTA** | `PATCH` | `/api/ota/implantacoes/{id}/resultado` | Confirma sucesso SHA-256 ou executa Rollback Automático |
+| **Firmware OTA** | `GET` | `/api/ota/implantacoes/dispositivo/{dispositivoId}` | Histórico de atualizações OTA do dispositivo |
+| **Dashboard** | `GET` | `/api/dashboard/global` | Resumo executivo global de toda a plataforma |
+| **Dashboard** | `GET` | `/api/dashboard/clusters` | Dashboards de saúde de todos os clusters ativos |
+| **Dashboard** | `GET` | `/api/dashboard/clusters/{clusterId}` | Diagnóstico de saúde (`SAUDAVEL`, `ATENCAO`, `CRITICO`) do cluster |
+
+---
+
+## 🚀 Guia de Execução Local e com Docker
+
+### Pré-requisitos
+- **Java 21 LTS** (Eclipse Temurin / OpenJDK 21)
+- **Maven 3.9+** (ou utilize o `./mvnw` incluso)
+- **Docker & Docker Compose**
+
+### Opção 1: Subir Infraestrutura Completa via Docker Compose
+```bash
+docker compose up -d --build
+```
+- API disponível em: `http://localhost:8080`
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+
+### Opção 2: Subir apenas PostgreSQL + Redis no Docker e rodar a API via Maven
+```bash
+docker compose up -d postgres redis
+./mvnw spring-boot:run
+```
+
+### Executando a Suíte de Testes Automatizados (100% Isolada em Memória)
+Os testes utilizam o perfil `test` (`application-test.yml`) com **H2 em modo de compatibilidade PostgreSQL**, migrations do **Flyway** ativas e cache em memória, dispensando conexões externas:
+```bash
+./mvnw -B clean test
+```
+
+### Testando os Endpoints Rapidamente
+Utilize a coleção pronta em [`docs/api-requests.http`](docs/api-requests.http) diretamente no **IntelliJ HTTP Client** ou na extensão **REST Client do VS Code**.
